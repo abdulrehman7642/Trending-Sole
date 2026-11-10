@@ -25,7 +25,7 @@ import CartPage from './pages/CartPage';
 const ADMIN_IDLE_KEY = 'trendingsole-admin-last-activity';
 const ADMIN_IDLE_MS = 10 * 60 * 1000;
 
-const PLP_PAGES = ['plp-men', 'plp-women', 'plp-kids', 'plp-new', 'plp-sale'];
+const PLP_PAGES = ['plp-men', 'plp-women', 'plp-kids', 'plp-new', 'plp-sale', 'plp-search'];
 
 function AdminGate() {
   const { page } = useApp();
@@ -127,13 +127,13 @@ function AdminGate() {
 }
 
 function AppContent() {
-  const { page } = useApp();
+  const { page, pageParams } = useApp();
 
   if (page.startsWith('admin-')) return <AdminGate />;
   const isPLP = PLP_PAGES.includes(page);
   const unavailable = <div className="max-w-screen-xl mx-auto p-10"><h1 className="text-3xl">This feature is not available yet</h1><p className="mt-3">Checkout and administration have not been connected.</p></div>;
   let pageContent = <HomePage />;
-  if (isPLP) pageContent = <ProductListPage />;
+  if (isPLP) pageContent = <ProductListPage key={`${page}:${pageParams.query || ''}`} />;
   else if (page === 'pdp') pageContent = <ProductDetailPage />;
   else if (page === 'cart') pageContent = <CartPage />;
   else if (page === 'checkout') pageContent = <CheckoutPage />;

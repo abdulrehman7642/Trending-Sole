@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import ProductCard from '../components/ui/ProductCard';
 import { formatPrice } from '../data/products';
 import { useApp } from '../context/AppContext';
@@ -14,10 +14,12 @@ const pageTitles: Record<string, { title: string; sub: string; filter?: string }
   'plp-kids': { title: "Kids' Collection", sub: 'Durable, playful, and comfy', filter: 'kids' },
   'plp-new': { title: 'New Arrivals', sub: 'The freshest styles just landed' },
   'plp-sale': { title: 'Season Sale', sub: 'Up to 40% off select styles' },
+  'plp-search': { title: 'Search Results', sub: '' },
 };
 
 export default function ProductListPage() {
-  const { page, navigate, products, catalogLoading, catalogError } = useApp();
+  const { page, pageParams, navigate, products, catalogLoading, catalogError } = useApp();
+  const query = page === 'plp-search' ? (pageParams.query || '').trim() : '';
   const pageInfo = pageTitles[page] || pageTitles['plp-men'];
 
   const [sort, setSort] = useState<SortOption>('featured');
@@ -29,8 +31,18 @@ export default function ProductListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 8;
 
+  useEffect(() => { setCurrentPage(1); }, [page, query, filterCategory, filterColor, priceRange, availability]);
+
   const filtered = useMemo(() => {
     let list = [...products];
+
+    if (page === 'plp-search') {
+      const terms = query.toLocaleLowerCase().split(/\s+/).filter(Boolean);
+      list = terms.length ? list.filter((p) => {
+        const text = [p.name, p.category, p.subCategory, p.description, p.material, p.sku, ...(p.tags || []), ...(p.colors || []).map(color => color.name)].filter(Boolean).join(' ').toLocaleLowerCase();
+        return terms.every(term => text.includes(term));
+      }) : [];
+    }
 
     // Category filter
     if (pageInfo.filter) {
@@ -47,7 +59,7 @@ export default function ProductListPage() {
 
     list = list.filter((p) => {
       const price = p.salePrice ?? p.price;
-      return price >= priceRange[0] && price <= priceRange[1];
+      return price >= priceRange[0] && ((page === 'plp-search' && priceRange[1] === 25000) || price <= priceRange[1]);
     });
 
     switch (sort) {
@@ -57,7 +69,7 @@ export default function ProductListPage() {
       case 'rating': return list.sort((a, b) => b.rating - a.rating);
       default: return list.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
     }
-  }, [page, sort, filterCategory, filterColor, priceRange, availability, products]);
+  }, [page, query, sort, filterCategory, filterColor, priceRange, availability, products]);
 
   const totalPages = Math.ceil(filtered.length / perPage);
   const paginated = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
@@ -79,7 +91,7 @@ export default function ProductListPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
         <div>
           <h1 className="font-serif text-4xl text-primary">{pageInfo.title}</h1>
-          <p className="text-sm text-muted mt-1">{pageInfo.sub}</p>
+          <p className="text-sm text-muted mt-1">{page === 'plp-search' ? `Results for “${query}”` : pageInfo.sub}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-xs text-muted">{filtered.length} products</span>
@@ -215,7 +227,7 @@ export default function ProductListPage() {
 
         {/* Product grid */}
         <div className="flex-1 min-w-0">
-          {paginated.length === 0 ? (
+          {catalogLoading || catalogError ? null : paginated.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
               <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
                 <svg className="w-7 h-7 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,10 +236,10 @@ export default function ProductListPage() {
               </div>
               <div>
                 <p className="font-serif text-xl text-primary">No products found</p>
-                <p className="text-sm text-muted mt-1">Try adjusting your filters.</p>
+                <p className="text-sm text-muted mt-1">{page === 'plp-search' ? 'Try a different search or adjust your filters.' : 'Try adjusting your filters.'}</p>
               </div>
               <button
-                onClick={() => { setFilterCategory(''); setFilterColor(''); setPriceRange([0, 25000]); }}
+                onClick={() => { setFilterCategory(''); setFilterColor(''); setPriceRange([0, 25000]); setAvailability('all'); setCurrentPage(1); }}
                 className="text-xs tracking-widest uppercase text-primary border border-primary px-5 py-2.5 hover:bg-primary hover:text-ivory transition-colors"
               >
                 Clear Filters

@@ -62,6 +62,7 @@ export type Page =
   | 'plp-kids'
   | 'plp-new'
   | 'plp-sale'
+  | 'plp-search'
   | 'pdp'
   | 'cart'
   | 'checkout'

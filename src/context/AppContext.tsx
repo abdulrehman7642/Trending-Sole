@@ -56,8 +56,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
   useEffect(() => { void refreshCatalog(); }, []);
 
-  const [page, setPage] = useState<Page>(window.location.pathname === '/admin' ? 'admin-dashboard' : window.location.pathname === '/track-order' ? 'track-order' : 'home');
-  const [pageParams, setPageParams] = useState<Record<string, string>>({});
+  const [page, setPage] = useState<Page>(window.location.pathname === '/admin' ? 'admin-dashboard' : window.location.pathname === '/track-order' ? 'track-order' : window.location.pathname === '/search' ? 'plp-search' : 'home');
+  const [pageParams, setPageParams] = useState<Record<string, string>>((): Record<string, string> => window.location.pathname === '/search' ? { query: new URLSearchParams(window.location.search).get('q') || '' } : {});
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -65,7 +65,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const navigate = (newPage: Page, params: Record<string, string> = {}) => {
     setPage(newPage);
-    window.history.replaceState(null, '', newPage.startsWith('admin-') ? '/admin' : newPage === 'track-order' ? '/track-order' : '/');
+    window.history.replaceState(null, '', newPage.startsWith('admin-') ? '/admin' : newPage === 'track-order' ? '/track-order' : newPage === 'plp-search' ? `/search?q=${encodeURIComponent(params.query || '')}` : '/');
     setPageParams(params);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

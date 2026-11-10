@@ -121,22 +121,24 @@ export default function Navbar() {
 
         {/* Search bar */}
         {searchOpen && (
-          <div className="border-t border-border bg-ivory px-6 lg:px-10 py-3 flex items-center gap-3">
+          <form role="search" onSubmit={(event) => { event.preventDefault(); const query = searchQuery.trim(); if (!query) return; navigate('plp-search', { query }); setSearchOpen(false); }} className="border-t border-border bg-ivory px-6 lg:px-10 py-3 flex items-center gap-3">
             <svg className="w-4 h-4 text-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
             <input
               autoFocus
               type="text"
+              aria-label="Search products"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search shoes, brands, styles…"
               className="flex-1 bg-transparent text-sm text-primary placeholder:text-muted outline-none font-sans"
             />
-            <button onClick={() => setSearchOpen(false)} className="text-muted hover:text-primary text-xs tracking-wide uppercase">
+            <button type="submit" className="text-primary text-xs tracking-wide uppercase">Search</button>
+            <button type="button" onClick={() => setSearchOpen(false)} className="text-muted hover:text-primary text-xs tracking-wide uppercase">
               Close
             </button>
-          </div>
+          </form>
         )}
       </header>
 
