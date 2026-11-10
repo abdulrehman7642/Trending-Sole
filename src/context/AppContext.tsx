@@ -30,6 +30,20 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
+type NavigationState = { page: Page; params: Record<string, string>; cartOpen?: boolean };
+
+function readLocation(): NavigationState {
+  const path = window.location.pathname;
+  if (path === '/admin') return { page: 'admin-dashboard', params: {} };
+  if (path === '/track-order') return { page: 'track-order', params: {} };
+  if (path === '/search') return { page: 'plp-search', params: { query: new URLSearchParams(window.location.search).get('q') || '' } };
+  return { page: 'home', params: {} };
+}
+
+function readHistoryState(): NavigationState {
+  return window.history.state?.trendingSole || readLocation();
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -56,17 +70,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
   useEffect(() => { void refreshCatalog(); }, []);
 
-  const [page, setPage] = useState<Page>(window.location.pathname === '/admin' ? 'admin-dashboard' : window.location.pathname === '/track-order' ? 'track-order' : window.location.pathname === '/search' ? 'plp-search' : 'home');
-  const [pageParams, setPageParams] = useState<Record<string, string>>((): Record<string, string> => window.location.pathname === '/search' ? { query: new URLSearchParams(window.location.search).get('q') || '' } : {});
+  const [page, setPage] = useState<Page>(() => readHistoryState().page);
+  const [pageParams, setPageParams] = useState<Record<string, string>>(() => readHistoryState().params);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [cartOpen, setCartOpen] = useState(false);
+  const [cartOpen, setCartOpenState] = useState(false);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [toast, setToast] = useState<AppContextType['toast']>(null);
 
+  useEffect(() => {
+    const current = readHistoryState();
+    window.history.replaceState({ ...window.history.state, trendingSole: { ...current, cartOpen: false } }, '');
+    const onPopState = () => {
+      const state = readHistoryState();
+      setPage(state.page);
+      setPageParams(state.params);
+      setCartOpenState(Boolean(state.cartOpen));
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const setCartOpen = (open: boolean) => {
+    const current = readHistoryState();
+    if (open && !current.cartOpen) {
+      window.history.pushState({ ...window.history.state, trendingSole: { ...current, cartOpen: true } }, '');
+    } else if (!open && current.cartOpen) {
+      window.history.back();
+    }
+    setCartOpenState(open);
+  };
+
   const navigate = (newPage: Page, params: Record<string, string> = {}) => {
+    const current = readHistoryState();
+    const url = newPage.startsWith('admin-') ? '/admin' : newPage === 'track-order' ? '/track-order' : newPage === 'plp-search' ? `/search?q=${encodeURIComponent(params.query || '')}` : '/';
+    const state = { ...window.history.state, trendingSole: { page: newPage, params, cartOpen: false } };
+    if (current.cartOpen || (current.page === newPage && JSON.stringify(current.params) === JSON.stringify(params))) {
+      window.history.replaceState(state, '', url);
+    } else {
+      window.history.pushState(state, '', url);
+    }
     setPage(newPage);
-    window.history.replaceState(null, '', newPage.startsWith('admin-') ? '/admin' : newPage === 'track-order' ? '/track-order' : newPage === 'plp-search' ? `/search?q=${encodeURIComponent(params.query || '')}` : '/');
     setPageParams(params);
+    setCartOpenState(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
