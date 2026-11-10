@@ -3,7 +3,7 @@ import SubscribeForm from '../ui/SubscribeForm';
 import { useApp } from '../../context/AppContext';
 
 export default function Footer() {
-  const { navigate } = useApp();
+  const { navigate, page } = useApp();
 
   return (
     <footer className="bg-primary text-ivory/80">
@@ -59,14 +59,14 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Newsletter */}
-        <div>
+        {/* The home page already has a newsletter form; retain this one on other pages. */}
+        {page !== 'home' && <div>
           <h4 className="text-xs tracking-widest uppercase text-ivory font-medium mb-5">Newsletter</h4>
           <p className="text-sm text-ivory/60 mb-4 leading-relaxed">
             Be first to know about new collections, exclusive offers, and style editorials.
           </p>
           <SubscribeForm compact />
-        </div>
+        </div>}
       </div>
 
       {/* Bottom bar */}

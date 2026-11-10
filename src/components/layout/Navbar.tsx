@@ -146,7 +146,7 @@ export default function Navbar() {
           <div className="absolute inset-0 bg-primary/60" onClick={() => setMobileOpen(false)} />
           <div className="absolute left-0 top-0 bottom-0 w-72 max-w-[85vw] overflow-y-auto bg-ivory flex flex-col">
             <div className="flex items-center justify-between p-6 border-b border-border">
-              <span className="font-serif text-xl text-primary">Menu</span>
+              <BrandLogo />
               <button onClick={() => setMobileOpen(false)} className="text-slate">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />

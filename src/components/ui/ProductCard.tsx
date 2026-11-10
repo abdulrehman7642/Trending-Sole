@@ -29,10 +29,17 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
         className="relative overflow-hidden bg-stone-100 aspect-[3/4]"
         onClick={() => navigate('pdp', { id: product.id })}
       >
+        {/* Fill the mobile frame behind images of different proportions. */}
+        <img
+          src={product.images[imgIdx]}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover scale-110 blur-lg opacity-60 sm:hidden"
+        />
         <img
           src={product.images[imgIdx]}
           alt={product.name}
-          className="w-full h-full object-contain sm:object-cover transition-transform duration-500 sm:group-hover:scale-105"
+          className="relative w-full h-full object-contain sm:object-cover transition-transform duration-500 sm:group-hover:scale-105"
         />
 
         {/* Badges */}
