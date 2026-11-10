@@ -1,0 +1,74 @@
+﻿import { useEffect, useState, FormEvent } from 'react';
+import { supabase } from '../../lib/supabase';
+import { useApp } from '../../context/AppContext';
+import { formatPrice } from '../../data/products';
+
+type Order = { id: string; order_number: string; customer: string; email: string; phone: string; status: string; payment_status: string; total: number; created_at: string; address: string; city: string; items: unknown };
+type Promotion = { id: string; name: string; code: string; type: 'percentage' | 'fixed'; value: number; starts_at: string | null; ends_at: string | null; active: boolean };
+const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'returned'];
+const card = 'bg-white border border-border rounded-sm p-6';
+const input = 'w-full border border-border rounded-sm px-3 py-2 bg-ivory text-sm';
+
+export default function AdminLiveData() {
+  const { page, products } = useApp();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [selected, setSelected] = useState<Order | null>(null);
+  const [form, setForm] = useState({ name: '', code: '', type: 'percentage', value: '', starts_at: '', ends_at: '' });
+  const load = async () => {
+    setLoading(true); setError('');
+    const [orderResult, promoResult] = await Promise.all([
+      supabase.from('orders').select('*').order('created_at', { ascending: false }),
+      supabase.from('promotions').select('*').order('created_at', { ascending: false }),
+    ]);
+    if (orderResult.error || promoResult.error) setError('Could not load admin data. Check your connection and access.');
+    else { setOrders(orderResult.data || []); setPromotions(promoResult.data || []); }
+    setLoading(false);
+  };
+  useEffect(() => { void load(); }, []);
+  const updateStatus = async (order: Order, status: string) => {
+    setBusy(true); setError('');
+    const { data, error } = await supabase.from('orders').update({ status }).eq('id', order.id).select('*').single();
+    setBusy(false);
+    if (error) { setError(error.message); return; }
+    setOrders(items => items.map(item => item.id === order.id ? data : item));
+    if (selected?.id === order.id) setSelected(data);
+  };
+  const addPromotion = async (event: FormEvent) => {
+    event.preventDefault(); setError('');
+    const value = Number(form.value);
+    if (!Number.isFinite(value) || value <= 0 || (form.type === 'percentage' && value > 100) || (form.starts_at && form.ends_at && form.ends_at < form.starts_at)) { setError('Enter a valid discount and date range.'); return; }
+    setBusy(true);
+    const { error } = await supabase.from('promotions').insert({ name: form.name.trim(), code: form.code.trim().toUpperCase(), type: form.type, value, starts_at: form.starts_at || null, ends_at: form.ends_at || null });
+    setBusy(false);
+    if (error) { setError(error.message); return; }
+    setForm({ name: '', code: '', type: 'percentage', value: '', starts_at: '', ends_at: '' });
+    await load();
+  };
+  const togglePromotion = async (promo: Promotion) => {
+    setBusy(true); setError('');
+    const { data, error } = await supabase.from('promotions').update({ active: !promo.active }).eq('id', promo.id).select('*').single();
+    setBusy(false);
+    if (error) { setError(error.message); return; }
+    setPromotions(items => items.map(item => item.id === promo.id ? data : item));
+  };
+  const customers = Array.from(orders.reduce((map, order) => {
+    const key = order.email.toLowerCase(); const previous = map.get(key);
+    map.set(key, { name: order.customer, email: order.email, city: order.city, count: (previous?.count || 0) + 1, total: (previous?.total || 0) + Number(order.total) });
+    return map;
+  }, new Map<string, { name: string; email: string; city: string; count: number; total: number }>()).values());
+  const completed = orders.filter(order => order.status !== 'cancelled' && order.status !== 'returned');
+  const revenue = completed.reduce((sum, order) => sum + Number(order.total), 0);
+  if (loading) return <p>Loading admin data…</p>;
+  if (error && !orders.length && !promotions.length) return <div role="alert" className={card}>{error}<button onClick={() => void load()} className="block mt-3 underline">Retry</button></div>;
+  return <div className="space-y-6">
+    {error && <p role="alert" className="text-terracotta">{error}</p>}
+    {(page === 'admin-dashboard' || page === 'admin-analytics') && <><div><h2 className="text-3xl">{page === 'admin-dashboard' ? 'Dashboard' : 'Analytics'}</h2><p className="text-sm text-muted mt-2">Live catalog and order totals</p></div><div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">{[{name:'Products', value: products.length}, {name:'Orders', value: orders.length}, {name:'Customers with orders', value: customers.length}, {name:'Order value', value: formatPrice(revenue)}].map(item => <div key={item.name} className={card}><p className="text-xs uppercase tracking-widest text-muted">{item.name}</p><p className="font-serif text-3xl mt-3">{item.value}</p></div>)}</div><p className="text-xs text-muted">Order value excludes cancelled and returned orders and is not necessarily paid revenue.</p></>}
+    {page === 'admin-orders' && <><h2 className="text-3xl">Orders</h2><div className={card}>{orders.length === 0 ? <p>No orders yet.</p> : <div className="overflow-auto"><table className="w-full text-left text-sm"><thead><tr><th className="p-2">Order</th><th>Customer</th><th>Total</th><th>Status</th><th /></tr></thead><tbody>{orders.map(order => <tr key={order.id} className="border-t border-border"><td className="p-2">{order.order_number}</td><td>{order.customer}</td><td>{formatPrice(Number(order.total))}</td><td><select aria-label={`Status for ${order.order_number}`} disabled={busy} value={order.status} onChange={e => void updateStatus(order, e.target.value)} className="border border-border p-2">{statuses.map(status => <option key={status}>{status}</option>)}</select></td><td><button onClick={() => setSelected(order)} className="underline">Details</button></td></tr>)}</tbody></table></div>}</div>{selected && <div className={card}><div className="flex justify-between"><h3 className="text-xl break-all">{selected.order_number}</h3><button onClick={() => setSelected(null)}>Close</button></div><p className="mt-3 break-words">{selected.customer} · {selected.email} · {selected.phone}</p><p>{selected.address}, {selected.city}</p><p>Payment: {selected.payment_status}</p><pre className="mt-4 whitespace-pre-wrap break-all text-xs">{JSON.stringify(selected.items, null, 2)}</pre></div>}</>}
+    {page === 'admin-customers' && <><h2 className="text-3xl">Customers</h2><div className={card}><p className="text-xs text-muted mb-4">Customers are derived from orders, grouped by email.</p>{customers.length === 0 ? <p>No customers with orders yet.</p> : customers.map(customer => <div key={customer.email} className="border-t border-border py-3 text-sm"><strong>{customer.name}</strong> · {customer.email} · {customer.city} · {customer.count} orders · {formatPrice(customer.total)}</div>)}</div></>}
+    {page === 'admin-promotions' && <><h2 className="text-3xl">Promotions</h2><p className="text-sm text-muted">Promotion records are stored here. Checkout does not apply them yet.</p><form onSubmit={addPromotion} className={`${card} grid grid-cols-1 md:grid-cols-3 gap-3`}><label className="text-sm">Name<input required value={form.name} onChange={e => setForm({...form, name:e.target.value})} className={input} /></label><label className="text-sm">Code<input required value={form.code} onChange={e => setForm({...form, code:e.target.value})} className={input} /></label><label className="text-sm">Type<select value={form.type} onChange={e => setForm({...form, type:e.target.value})} className={input}><option value="percentage">Percentage</option><option value="fixed">Fixed amount</option></select></label><label className="text-sm">Value<input required type="number" min="0.01" step="0.01" value={form.value} onChange={e => setForm({...form, value:e.target.value})} className={input} /></label><label className="text-sm">Start date<input type="date" value={form.starts_at} onChange={e => setForm({...form, starts_at:e.target.value})} className={input} /></label><label className="text-sm">End date<input type="date" value={form.ends_at} onChange={e => setForm({...form, ends_at:e.target.value})} className={input} /></label><button disabled={busy} className="bg-primary text-ivory py-3 px-5 text-sm">Create promotion</button></form><div className={card}>{promotions.length === 0 ? <p>No promotions yet.</p> : promotions.map(promo => <div key={promo.id} className="flex justify-between items-center border-b border-border py-3 gap-3"><div><strong>{promo.name}</strong><p className="text-sm text-muted">{promo.code} · {promo.type === 'percentage' ? `${promo.value}%` : formatPrice(Number(promo.value))} · {promo.active ? 'Enabled' : 'Disabled'}</p></div><button disabled={busy} onClick={() => void togglePromotion(promo)} className="text-sm underline">{promo.active ? 'Disable' : 'Enable'}</button></div>)}</div></>}
+  </div>;
+}

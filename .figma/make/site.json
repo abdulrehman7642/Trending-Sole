@@ -1,0 +1,11 @@
+{
+  "description": "Shop footwear for men, women, and kids at Trending Sole, with delivery across the UAE.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  },
+  "title": "Trending Sole"
+}
