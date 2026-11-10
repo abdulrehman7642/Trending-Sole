@@ -13,7 +13,7 @@ export default function Footer() {
         <div>
           <div className="mb-4"><BrandLogo inverse /></div>
           <p className="text-sm leading-relaxed text-ivory/60 mb-6">
-            Every Step, Refined. Premium footwear crafted for the modern South Asian wardrobe.
+            Every Step, Refined. Premium footwear crafted for the modern Western Asia wardrobe.
           </p>
           <div className="flex gap-4">
             {['instagram', 'facebook', 'tiktok'].map((s) => (
