@@ -37,6 +37,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshCatalog = async () => {
     setCatalogLoading(true);
+    try {
     const [{ data, error }, summary] = await Promise.all([
       supabase.from('products').select('*').order('created_at', { ascending: false }),
       supabase.from('product_rating_summary').select('product_id, average_rating, rating_count'),
@@ -47,7 +48,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const ratings = new Map((summary.data || []).map(row => [row.product_id, row]));
       setProducts((data || []).map((p) => { const aggregate = ratings.get(p.id); return { ...p, subCategory: p.sub_category, salePrice: p.sale_price == null ? undefined : Number(p.sale_price), price: Number(p.price), rating: Number(aggregate?.average_rating || 0), reviewCount: Number(aggregate?.rating_count || 0), isNew: p.is_new, isFeatured: p.is_featured }; }));
     }
-    setCatalogLoading(false);
+    } catch {
+      setCatalogError('Unable to load products. Please try again later.');
+    } finally {
+      setCatalogLoading(false);
+    }
   };
   useEffect(() => { void refreshCatalog(); }, []);
 

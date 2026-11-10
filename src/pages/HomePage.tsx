@@ -46,6 +46,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      {catalogLoading && <p role="status" className="p-4 text-center text-muted">Loading products…</p>}
       {catalogError && <p role="alert" className="p-4 text-center text-terracotta">{catalogError}</p>}
       {!catalogLoading && !catalogError && products.length === 0 && <p className="p-4 text-center text-muted">Our product catalog is currently empty.</p>}
       {/* Hero */}

@@ -66,7 +66,7 @@ export default function ProductListPage() {
 
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-10 py-10">
-      {catalogLoading && <p>Loading products?</p>}
+      {catalogLoading && <p role="status">Loading products…</p>}
       {catalogError && <p role="alert">{catalogError}</p>}
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-muted mb-8">
