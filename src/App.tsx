@@ -12,7 +12,7 @@ import AdminProducts from './pages/admin/AdminProducts';
 import AdminAddProduct from './pages/admin/AdminAddProduct';
 import AdminInventory from './pages/admin/AdminInventory';
 import { AppProvider, useApp } from './context/AppContext';
-import AnnouncementBar from './components/layout/AnnouncementBar';
+// import AnnouncementBar from './components/layout/AnnouncementBar';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/ui/CartDrawer';
@@ -144,7 +144,7 @@ function AppContent() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {page !== 'checkout' && page !== 'order-confirm' && <AnnouncementBar />}
+      {/* {page !== 'checkout' && page !== 'order-confirm' && <AnnouncementBar />} */}
       {page !== 'checkout' && page !== 'order-confirm' && <Navbar />}
       <main className="flex-1">{pageContent}</main>
       <Footer />
