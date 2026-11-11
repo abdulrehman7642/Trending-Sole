@@ -178,7 +178,7 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-primary py-20 px-6 lg:px-10">
         <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1">
-            <p className="text-xs tracking-[0.3em] uppercase text-gold font-medium mb-4">Autumn / Winter 2024</p>
+            <p className="text-xs tracking-[0.3em] uppercase text-gold font-medium mb-4">The Signature Collection</p>
             <h2 className="font-serif text-5xl lg:text-6xl text-ivory leading-tight mb-6">
               Crafted for<br />Every Occasion
             </h2>
