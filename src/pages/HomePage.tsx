@@ -32,6 +32,24 @@ const heroSlides = [
   },
 ];
 
+function FeaturedImage({ product }: { product: Product }) {
+  const images = (Array.isArray(product.images) ? product.images : []).filter((url): url is string => typeof url === 'string' && url.trim().length > 0);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  return images[imageIndex] ? (
+    <img
+      src={images[imageIndex]}
+      alt={product.name}
+      onError={() => setImageIndex(index => index + 1)}
+      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+    />
+  ) : (
+    <span className="p-4 text-center text-xs text-slate" role="img" aria-label={`Image unavailable for ${product.name}`}>
+      Image unavailable
+    </span>
+  );
+}
+
 export default function HomePage() {
   const { navigate, products, catalogLoading, catalogError } = useApp();
   const [heroIdx, setHeroIdx] = useState(0);
@@ -41,6 +59,7 @@ export default function HomePage() {
   }, [heroIdx]);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const featured = products.filter((p) => p.isFeatured);
+  const editorialProducts = featured.slice(0, 4);
   const newArrivals = products.filter((p) => p.isNew).slice(0, 4);
   const saleProducts = products.filter((p) => p.salePrice !== undefined).slice(0, 4);
 
@@ -175,21 +194,17 @@ export default function HomePage() {
               </button>
             </div>
           </div>
-          <div className="flex-1 grid grid-cols-2 gap-3 max-w-sm">
-            {featured.slice(0, 4).map((p, i) => (
+          {editorialProducts.length > 0 && <div className="w-full flex-1 grid grid-cols-2 gap-3 max-w-sm">
+            {editorialProducts.map((p, i) => (
               <button
                 key={p.id}
                 onClick={() => navigate('pdp', { id: p.id })}
-                className={`overflow-hidden bg-stone-800 ${i === 0 ? 'row-span-2 col-span-1' : ''}`}
+                className={`group flex items-center justify-center overflow-hidden bg-stone-100 aspect-[4/3] ${i === 0 && (editorialProducts.length === 1 || editorialProducts.length === 3) ? 'col-span-2' : ''}`}
               >
-                <img
-                  src={p.images[0]}
-                  alt={p.name}
-                  className={`w-full object-cover hover:scale-105 transition-transform duration-500 ${i === 0 ? 'h-64' : `h-28 object-bottom ${i >= 2 ? 'md:object-center' : ''}`}`}
-                />
+                <FeaturedImage key={`${p.id}:${JSON.stringify(p.images)}`} product={p} />
               </button>
             ))}
-          </div>
+          </div>}
         </div>
       </section>
 
