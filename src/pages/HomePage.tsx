@@ -94,7 +94,6 @@ export default function HomePage() {
       {catalogLoading && <p role="status" className="p-4 text-center text-muted">Loading products…</p>}
       {catalogError && <p role="alert" className="p-4 text-center text-terracotta">{catalogError}</p>}
       {!catalogLoading && !catalogError && products.length === 0 && <p className="p-4 text-center text-muted">Our product catalog is currently empty.</p>}
-      {saleSection}
       {/* Hero */}
       <section className="relative h-[75vh] min-h-[520px] overflow-hidden bg-primary" aria-label="Featured collections" aria-roledescription="carousel">
         {heroSlides.map((slide, i) => (
@@ -176,6 +175,8 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {saleSection}
 
       {/* New Arrivals */}
       <section className="max-w-screen-xl mx-auto px-6 lg:px-10 py-8 pb-16">
