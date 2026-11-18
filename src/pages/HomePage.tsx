@@ -62,12 +62,39 @@ export default function HomePage() {
   const editorialProducts = featured.slice(0, 4);
   const newArrivals = products.filter((p) => p.isNew).slice(0, 4);
   const saleProducts = products.filter((p) => p.salePrice !== undefined).slice(0, 4);
+  const saleSection = saleProducts.length > 0 ? (
+    <section className="bg-stone-100 py-16">
+      <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <p className="text-xs tracking-[0.3em] uppercase text-terracotta font-medium mb-2">Limited Time</p>
+            <h2 className="font-serif text-4xl text-primary">Season Sale</h2>
+          </div>
+          <button
+            onClick={() => navigate('plp-sale')}
+            className="text-xs tracking-widest uppercase text-terracotta hover:text-terracotta/80 transition-colors flex items-center gap-2 font-medium"
+          >
+            Shop Sale
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {saleProducts.map((product) => (
+            <ProductCard key={product.id} product={product} onQuickView={setQuickViewProduct} />
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : null;
 
   return (
     <div className="min-h-screen">
       {catalogLoading && <p role="status" className="p-4 text-center text-muted">Loading products…</p>}
       {catalogError && <p role="alert" className="p-4 text-center text-terracotta">{catalogError}</p>}
       {!catalogLoading && !catalogError && products.length === 0 && <p className="p-4 text-center text-muted">Our product catalog is currently empty.</p>}
+      {saleSection}
       {/* Hero */}
       <section className="relative h-[75vh] min-h-[520px] overflow-hidden bg-primary" aria-label="Featured collections" aria-roledescription="carousel">
         {heroSlides.map((slide, i) => (
@@ -231,34 +258,6 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-
-      {/* Sale section */}
-      {saleProducts.length > 0 && (
-        <section className="bg-stone-100 py-16">
-          <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <p className="text-xs tracking-[0.3em] uppercase text-terracotta font-medium mb-2">Limited Time</p>
-                <h2 className="font-serif text-4xl text-primary">Season Sale</h2>
-              </div>
-              <button
-                onClick={() => navigate('plp-sale')}
-                className="text-xs tracking-widest uppercase text-terracotta hover:text-terracotta/80 transition-colors flex items-center gap-2 font-medium"
-              >
-                Shop Sale
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {saleProducts.map((product) => (
-                <ProductCard key={product.id} product={product} onQuickView={setQuickViewProduct} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Features strip */}
       <section className="border-y border-border py-10">
