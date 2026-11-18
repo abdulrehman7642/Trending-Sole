@@ -25,7 +25,7 @@ import CartPage from './pages/CartPage';
 const ADMIN_IDLE_KEY = 'trendingsole-admin-last-activity';
 const ADMIN_IDLE_MS = 10 * 60 * 1000;
 
-const PLP_PAGES = ['plp-men', 'plp-women', 'plp-kids', 'plp-new', 'plp-sale', 'plp-search'];
+const PLP_PAGES = ['plp-men', 'plp-women', 'plp-kids', 'plp-new', 'plp-sale', 'plp-search', 'wishlist'];
 
 function AdminGate() {
   const { page } = useApp();

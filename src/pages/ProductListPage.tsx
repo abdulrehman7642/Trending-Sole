@@ -15,10 +15,11 @@ const pageTitles: Record<string, { title: string; sub: string; filter?: string }
   'plp-new': { title: 'New Arrivals', sub: 'The freshest styles just landed' },
   'plp-sale': { title: 'Season Sale', sub: 'Up to 40% off select styles' },
   'plp-search': { title: 'Search Results', sub: '' },
+  wishlist: { title: 'Favorites', sub: 'Your saved products' },
 };
 
 export default function ProductListPage() {
-  const { page, pageParams, navigate, products, catalogLoading, catalogError } = useApp();
+  const { page, pageParams, navigate, products, catalogLoading, catalogError, wishlist } = useApp();
   const query = page === 'plp-search' ? (pageParams.query || '').trim() : '';
   const pageInfo = pageTitles[page] || pageTitles['plp-men'];
 
@@ -43,6 +44,7 @@ export default function ProductListPage() {
         return terms.every(term => text.includes(term));
       }) : [];
     }
+    if (page === 'wishlist') list = list.filter((product) => wishlist.includes(product.id));
 
     // Category filter
     if (pageInfo.filter) {
@@ -69,7 +71,7 @@ export default function ProductListPage() {
       case 'rating': return list.sort((a, b) => b.rating - a.rating);
       default: return list.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
     }
-  }, [page, query, sort, filterCategory, filterColor, priceRange, availability, products]);
+  }, [page, query, sort, filterCategory, filterColor, priceRange, availability, products, wishlist]);
 
   const totalPages = Math.ceil(filtered.length / perPage);
   const paginated = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);

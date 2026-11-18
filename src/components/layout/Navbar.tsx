@@ -4,11 +4,11 @@ import { useApp } from '../../context/AppContext';
 import { Page } from '../../types';
 
 const navLinks: { label: string; page: Page }[] = [
+  { label: 'Sale', page: 'plp-sale' },
   { label: 'Men', page: 'plp-men' },
   { label: 'Women', page: 'plp-women' },
   { label: 'Kids', page: 'plp-kids' },
   { label: 'New Arrivals', page: 'plp-new' },
-  { label: 'Sale', page: 'plp-sale' },
 ];
 
 export default function Navbar() {
@@ -89,8 +89,8 @@ export default function Navbar() {
             </button>
             */}
             <button
-              onClick={() => navigate('plp-new')}
-              className="hidden sm:block text-slate hover:text-primary transition-colors relative"
+              onClick={() => navigate('wishlist')}
+              className="text-slate hover:text-primary transition-colors relative"
               aria-label="Wishlist"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +161,7 @@ export default function Navbar() {
                   key={link.page}
                   onClick={() => { navigate(link.page); setMobileOpen(false); }}
                   className={`text-left text-sm tracking-widest uppercase font-medium py-3 px-4 rounded transition-colors hover:bg-primary/5 ${
-                    link.label === 'Sale' ? 'text-terracotta' : 'text-slate'
+                    page === link.page ? (link.label === 'Sale' ? 'text-terracotta bg-primary/5' : 'text-gold bg-primary/5') : (link.label === 'Sale' ? 'text-terracotta' : 'text-slate')
                   }`}
                 >
                   {link.label}

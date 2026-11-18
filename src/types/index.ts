@@ -63,6 +63,7 @@ export type Page =
   | 'plp-new'
   | 'plp-sale'
   | 'plp-search'
+  | 'wishlist'
   | 'pdp'
   | 'cart'
   | 'checkout'

@@ -37,6 +37,7 @@ function readLocation(): NavigationState {
   if (path === '/admin') return { page: 'admin-dashboard', params: {} };
   if (path === '/track-order') return { page: 'track-order', params: {} };
   if (path === '/search') return { page: 'plp-search', params: { query: new URLSearchParams(window.location.search).get('q') || '' } };
+  if (path === '/wishlist') return { page: 'wishlist', params: {} };
   return { page: 'home', params: {} };
 }
 
@@ -70,15 +71,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
   useEffect(() => { void refreshCatalog(); }, []);
 
-  const [page, setPage] = useState<Page>(() => readHistoryState().page);
-  const [pageParams, setPageParams] = useState<Record<string, string>>(() => readHistoryState().params);
+  const [page, setPage] = useState<Page>(() => readLocation().page);
+  const [pageParams, setPageParams] = useState<Record<string, string>>(() => readLocation().params);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpenState] = useState(false);
-  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [wishlist, setWishlist] = useState<string[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('trendingsole-wishlist') || '[]');
+      return Array.isArray(saved) ? saved.filter((id): id is string => typeof id === 'string') : [];
+    } catch { return []; }
+  });
+  useEffect(() => { localStorage.setItem('trendingsole-wishlist', JSON.stringify(wishlist)); }, [wishlist]);
   const [toast, setToast] = useState<AppContextType['toast']>(null);
 
   useEffect(() => {
-    const current = readHistoryState();
+    const current = readLocation();
     window.history.replaceState({ ...window.history.state, trendingSole: { ...current, cartOpen: false } }, '');
     const onPopState = () => {
       const state = readHistoryState();
@@ -102,7 +109,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const navigate = (newPage: Page, params: Record<string, string> = {}) => {
     const current = readHistoryState();
-    const url = newPage.startsWith('admin-') ? '/admin' : newPage === 'track-order' ? '/track-order' : newPage === 'plp-search' ? `/search?q=${encodeURIComponent(params.query || '')}` : '/';
+    const url = newPage.startsWith('admin-') ? '/admin' : newPage === 'track-order' ? '/track-order' : newPage === 'plp-search' ? `/search?q=${encodeURIComponent(params.query || '')}` : newPage === 'wishlist' ? '/wishlist' : '/';
     const state = { ...window.history.state, trendingSole: { page: newPage, params, cartOpen: false } };
     if (current.cartOpen || (current.page === newPage && JSON.stringify(current.params) === JSON.stringify(params))) {
       window.history.replaceState(state, '', url);
