@@ -169,5 +169,11 @@ SET images = ARRAY[
 ]
 FROM numbered, pool
 WHERE p.id = numbered.id;
+
+-- If a verified multi-angle gallery is unavailable, keep only the genuine
+-- image instead of duplicating it or mixing another shoe design.
+UPDATE public.products
+SET images = ARRAY[regexp_replace(images[1], '&gallery=.*$', '')]
+WHERE array_length(images, 1) > 0;
 COMMIT;
 
