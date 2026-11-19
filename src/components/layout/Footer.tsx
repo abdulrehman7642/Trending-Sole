@@ -29,15 +29,20 @@ export default function Footer() {
           <h4 className="text-xs tracking-widest uppercase text-ivory font-medium mb-5">Shop</h4>
           <ul className="space-y-3">
             {[
+              { label: 'Sale', page: 'plp-sale' as const },
+              { label: 'New Arrivals', page: 'plp-new' as const },
+              { label: 'Nike', page: 'plp-brand' as const, params: { brand: 'Nike' } },
+              { label: 'adidas', page: 'plp-brand' as const, params: { brand: 'adidas' } },
+              { label: 'Skechers', page: 'plp-brand' as const, params: { brand: 'Skechers' } },
+              { label: 'PUMA', page: 'plp-brand' as const, params: { brand: 'PUMA' } },
+              { label: 'Anta Sports', page: 'plp-brand' as const, params: { brand: 'Anta Sports' } },
               { label: "Men's Collection", page: 'plp-men' as const },
               { label: "Women's Collection", page: 'plp-women' as const },
               { label: "Kids' Collection", page: 'plp-kids' as const },
-              { label: 'New Arrivals', page: 'plp-new' as const },
-              { label: 'Sale', page: 'plp-sale' as const },
-            ].map((link) => (
-              <li key={link.page}>
+            ].map((link, index) => (
+              <li key={link.page + '-' + link.label + '-' + index}>
                 <button
-                  onClick={() => navigate(link.page)}
+                  onClick={() => navigate(link.page, link.params)}
                   className="text-sm hover:text-gold transition-colors text-ivory/60"
                 >
                   {link.label}

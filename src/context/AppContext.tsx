@@ -37,6 +37,7 @@ function readLocation(): NavigationState {
   if (path === '/admin') return { page: 'admin-dashboard', params: {} };
   if (path === '/track-order') return { page: 'track-order', params: {} };
   if (path === '/search') return { page: 'plp-search', params: { query: new URLSearchParams(window.location.search).get('q') || '' } };
+  if (path === '/brand') return { page: 'plp-brand', params: { brand: new URLSearchParams(window.location.search).get('name') || '' } };
   if (path === '/wishlist') return { page: 'wishlist', params: {} };
   return { page: 'home', params: {} };
 }
@@ -109,7 +110,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const navigate = (newPage: Page, params: Record<string, string> = {}) => {
     const current = readHistoryState();
-    const url = newPage.startsWith('admin-') ? '/admin' : newPage === 'track-order' ? '/track-order' : newPage === 'plp-search' ? `/search?q=${encodeURIComponent(params.query || '')}` : newPage === 'wishlist' ? '/wishlist' : '/';
+    const url = newPage.startsWith('admin-') ? '/admin' : newPage === 'track-order' ? '/track-order' : newPage === 'plp-search' ? `/search?q=${encodeURIComponent(params.query || '')}` : newPage === 'plp-brand' ? `/brand?name=${encodeURIComponent(params.brand || '')}` : newPage === 'wishlist' ? '/wishlist' : '/';
     const state = { ...window.history.state, trendingSole: { page: newPage, params, cartOpen: false } };
     if (current.cartOpen || (current.page === newPage && JSON.stringify(current.params) === JSON.stringify(params))) {
       window.history.replaceState(state, '', url);

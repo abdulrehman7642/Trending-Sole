@@ -3,16 +3,23 @@ import { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Page } from '../../types';
 
-const navLinks: { label: string; page: Page }[] = [
+const navLinks: { label: string; page: Page; params?: Record<string, string> }[] = [
   { label: 'Sale', page: 'plp-sale' },
+  { label: 'New Arrivals', page: 'plp-new' },
+  { label: 'Nike', page: 'plp-brand', params: { brand: 'Nike' } },
+  { label: 'adidas', page: 'plp-brand', params: { brand: 'adidas' } },
+  { label: 'Skechers', page: 'plp-brand', params: { brand: 'Skechers' } },
+  { label: 'PUMA', page: 'plp-brand', params: { brand: 'PUMA' } },
+  { label: 'Anta Sports', page: 'plp-brand', params: { brand: 'Anta Sports' } },
   { label: 'Men', page: 'plp-men' },
   { label: 'Women', page: 'plp-women' },
   { label: 'Kids', page: 'plp-kids' },
-  { label: 'New Arrivals', page: 'plp-new' },
 ];
 
 export default function Navbar() {
-  const { navigate, cartCount, page, setCartOpen, cartOpen, wishlist } = useApp();
+  const { navigate, cartCount, page, pageParams, setCartOpen, cartOpen, wishlist } = useApp();
+  const isLinkActive = (link: (typeof navLinks)[number]) =>
+    page === link.page && (!link.params?.brand || link.params.brand.toLowerCase() === (pageParams.brand || '').toLowerCase());
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,13 +59,13 @@ export default function Navbar() {
           </button>
 
           {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
             {navLinks.map((link) => (
               <button
-                key={link.page}
-                onClick={() => navigate(link.page)}
+                key={link.label}
+                onClick={() => navigate(link.page, link.params)}
                 className={`text-xs tracking-widest uppercase font-medium transition-colors hover:text-gold pb-0.5 border-b border-transparent hover:border-gold ${
-                  page === link.page ? 'text-gold border-gold' : 'text-slate'
+                  isLinkActive(link) ? 'text-gold border-gold' : 'text-slate'
                 } ${link.label === 'Sale' ? '!text-terracotta hover:!text-terracotta hover:!border-terracotta' : ''}`}
               >
                 {link.label}
@@ -158,10 +165,10 @@ export default function Navbar() {
             <nav className="flex flex-col p-6 gap-1">
               {navLinks.map((link) => (
                 <button
-                  key={link.page}
-                  onClick={() => { navigate(link.page); setMobileOpen(false); }}
+                  key={link.label}
+                  onClick={() => { navigate(link.page, link.params); setMobileOpen(false); }}
                   className={`text-left text-sm tracking-widest uppercase font-medium py-3 px-4 rounded transition-colors hover:bg-primary/5 ${
-                    page === link.page ? (link.label === 'Sale' ? 'text-terracotta bg-primary/5' : 'text-gold bg-primary/5') : (link.label === 'Sale' ? 'text-terracotta' : 'text-slate')
+                    isLinkActive(link) ? (link.label === 'Sale' ? 'text-terracotta bg-primary/5' : 'text-gold bg-primary/5') : (link.label === 'Sale' ? 'text-terracotta' : 'text-slate')
                   }`}
                 >
                   {link.label}

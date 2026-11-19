@@ -7,6 +7,7 @@ export default function AdminAddProduct() {
   const existing = products.find((p) => p.id === pageParams.id);
   const isEdit = Boolean(pageParams.id);
   const [saving, setSaving] = useState(false);
+  const existingBrand = existing?.tags?.find((tag) => ['nike', 'adidas', 'skechers', 'puma', 'anta sports'].includes(tag.toLowerCase())) || '';
 
   const [form, setForm] = useState({
     name: existing?.name || '',
@@ -20,6 +21,7 @@ export default function AdminAddProduct() {
     material: existing?.material || '',
     isNew: existing?.isNew || false,
     isFeatured: existing?.isFeatured || false,
+    brand: existingBrand,
   });
 
   const [sizes, setSizes] = useState<string[]>(existing?.sizes || []);
@@ -66,7 +68,7 @@ export default function AdminAddProduct() {
     }
     if (form.salePrice && (Number(form.salePrice) < 0 || Number(form.salePrice) > Number(form.price))) { showToast('Sale price must be between zero and the regular price.', 'error'); return; }
     const slug = existing?.slug || `${form.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${crypto.randomUUID().slice(0, 8)}`;
-    const values = { name: form.name.trim(), sku: form.sku.trim(), slug, category: form.category, sub_category: form.subCategory, price: Number(form.price), sale_price: form.salePrice === '' ? null : Number(form.salePrice), stock: Number(form.stock), description: form.description, material: form.material, is_new: form.isNew, is_featured: form.isFeatured, sizes, colors, images: images.map((url) => url.trim()).filter(Boolean) };
+    const values = { name: form.name.trim(), sku: form.sku.trim(), slug, category: form.category, sub_category: form.subCategory, price: Number(form.price), sale_price: form.salePrice === '' ? null : Number(form.salePrice), stock: Number(form.stock), description: form.description, material: form.material, is_new: form.isNew, is_featured: form.isFeatured, sizes, colors, images: images.map((url) => url.trim()).filter(Boolean), tags: form.brand ? [form.brand] : [] };
     setSaving(true);
     const query = isEdit ? supabase.from('products').update(values).eq('id', pageParams.id) : supabase.from('products').insert(values);
     const { data, error } = await query.select('id');
@@ -118,6 +120,18 @@ export default function AdminAddProduct() {
             <div>
               <label className={labelClass}>Product Name</label>
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputClass} placeholder="e.g. Meridian Leather Oxford" />
+            </div>
+            <div>
+              <label className={labelClass}>Brand</label>
+              <select value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} className={inputClass}>
+                <option value="">Select brand</option>
+                <option value="Nike">Nike</option>
+                <option value="adidas">adidas</option>
+                <option value="Skechers">Skechers</option>
+                <option value="PUMA">PUMA</option>
+                <option value="Anta Sports">Anta Sports</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

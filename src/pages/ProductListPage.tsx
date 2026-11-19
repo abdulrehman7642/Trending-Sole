@@ -14,6 +14,7 @@ const pageTitles: Record<string, { title: string; sub: string; filter?: string }
   'plp-kids': { title: "Kids' Collection", sub: 'Durable, playful, and comfy', filter: 'kids' },
   'plp-new': { title: 'New Arrivals', sub: 'The freshest styles just landed' },
   'plp-sale': { title: 'Season Sale', sub: 'Up to 40% off select styles' },
+  'plp-brand': { title: 'Brand Collection', sub: 'Explore the latest performance footwear' },
   'plp-search': { title: 'Search Results', sub: '' },
   wishlist: { title: 'Favorites', sub: 'Your saved products' },
 };
@@ -22,6 +23,7 @@ export default function ProductListPage() {
   const { page, pageParams, navigate, products, catalogLoading, catalogError, wishlist } = useApp();
   const query = page === 'plp-search' ? (pageParams.query || '').trim() : '';
   const pageInfo = pageTitles[page] || pageTitles['plp-men'];
+  const brand = page === 'plp-brand' ? (pageParams.brand || '').trim() : '';
 
   const [sort, setSort] = useState<SortOption>('featured');
   const [filterCategory, setFilterCategory] = useState<SubCategory | ''>('');
@@ -45,6 +47,10 @@ export default function ProductListPage() {
       }) : [];
     }
     if (page === 'wishlist') list = list.filter((product) => wishlist.includes(product.id));
+    if (page === 'plp-brand') {
+      const target = brand.toLocaleLowerCase();
+      list = list.filter((product) => (product.tags || []).some((tag) => tag.toLocaleLowerCase() === target));
+    }
 
     // Category filter
     if (pageInfo.filter) {
@@ -71,7 +77,7 @@ export default function ProductListPage() {
       case 'rating': return list.sort((a, b) => b.rating - a.rating);
       default: return list.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
     }
-  }, [page, query, sort, filterCategory, filterColor, priceRange, availability, products, wishlist]);
+  }, [page, query, brand, sort, filterCategory, filterColor, priceRange, availability, products, wishlist]);
 
   const totalPages = Math.ceil(filtered.length / perPage);
   const paginated = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
@@ -86,13 +92,13 @@ export default function ProductListPage() {
       <div className="flex items-center gap-2 text-xs text-muted mb-8">
         <button onClick={() => navigate('home')} className="hover:text-primary transition-colors">Home</button>
         <span>/</span>
-        <span className="text-primary">{pageInfo.title}</span>
+        <span className="text-primary">{page === 'plp-brand' && brand ? brand : pageInfo.title}</span>
       </div>
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-serif text-4xl text-primary">{pageInfo.title}</h1>
+          <h1 className="font-serif text-4xl text-primary">{page === 'plp-brand' && brand ? brand : pageInfo.title}</h1>
           <p className="text-sm text-muted mt-1">{page === 'plp-search' ? `Results for “${query}”` : pageInfo.sub}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
