@@ -44,6 +44,7 @@ export default function HomePage() {
   useEffect(() => {
     setHeroIdx(0);
   }, [heroSlides.length]);
+  // Retained only for compatibility with the hidden legacy markup below.
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const featured = products.filter((p) => p.isFeatured);
   const editorialProducts = featured.slice(0, 4);
@@ -69,7 +70,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {saleProducts.map((product) => (
-            <ProductCard key={product.id} product={product} onQuickView={setQuickViewProduct} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </div>
@@ -167,7 +168,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {newArrivals.map((product) => (
-            <ProductCard key={product.id} product={product} onQuickView={setQuickViewProduct} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
@@ -225,7 +226,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {featured.slice(0, 4).map((product) => (
-            <ProductCard key={product.id} product={product} onQuickView={setQuickViewProduct} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
@@ -261,8 +262,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Quick view modal */}
-      {quickViewProduct && (
+      {/* Legacy quick-view modal removed. */}
+      {quickViewProduct ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-primary/50 backdrop-blur-sm" onClick={() => setQuickViewProduct(null)} />
           <div className="relative bg-ivory rounded-sm max-w-2xl w-full shadow-2xl max-h-[90dvh] overflow-y-auto">
@@ -304,7 +305,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

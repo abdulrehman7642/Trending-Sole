@@ -5,14 +5,14 @@ import { useApp } from '../../context/AppContext';
 
 interface ProductCardProps {
   product: Product;
-  onQuickView?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onQuickView }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   const { navigate, toggleWishlist, wishlist } = useApp();
   const [imgIdx, setImgIdx] = useState(0);
   const [hovered, setHovered] = useState(false);
   const isWishlisted = wishlist.includes(product.id);
+  const openProduct = () => navigate('pdp', { id: product.id });
   const hasDiscount = product.salePrice !== undefined;
   const discount = hasDiscount
     ? Math.round(((product.price - product.salePrice!) / product.price) * 100)
@@ -67,25 +67,22 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
           </svg>
         </button>
 
-        {/* Quick view */}
-        {onQuickView && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onQuickView(product); }}
-            className="hidden sm:block absolute bottom-3 inset-x-3 bg-primary/90 backdrop-blur-sm text-ivory text-[10px] tracking-widest uppercase py-2.5 text-center sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 transition-all sm:translate-y-2 sm:group-hover:translate-y-0 font-semibold"
-          >
-            Quick View
-          </button>
-        )}
       </div>
 
-      {onQuickView && (
+      <div className="flex flex-col">
         <button
-          onClick={() => onQuickView(product)}
-          className="sm:hidden bg-primary/90 text-ivory text-[10px] tracking-widest uppercase py-2.5 text-center font-semibold"
+          onClick={(e) => { e.stopPropagation(); openProduct(); }}
+          className="bg-primary/90 text-ivory text-[10px] tracking-widest uppercase py-2.5 text-center font-semibold hover:bg-slate transition-colors"
         >
           Quick View
         </button>
-      )}
+        <button
+          onClick={(e) => { e.stopPropagation(); openProduct(); }}
+          className="bg-gold text-primary text-[10px] tracking-widest uppercase py-2.5 text-center font-semibold hover:bg-gold-light transition-colors"
+        >
+          Buy Now
+        </button>
+      </div>
 
       {/* Info */}
       <div className="p-2.5 sm:p-4 min-w-0 flex flex-col gap-1" onClick={() => navigate('pdp', { id: product.id })}>
