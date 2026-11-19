@@ -83,7 +83,7 @@ export default function HomePage() {
       {catalogError && <p role="alert" className="p-4 text-center text-terracotta">{catalogError}</p>}
       {!catalogLoading && !catalogError && products.length === 0 && <p className="p-4 text-center text-muted">Our product catalog is currently empty.</p>}
       {/* Hero */}
-      {heroSlides.length > 0 && <section className="relative h-[40vh] min-h-[280px] sm:h-[52vh] sm:min-h-[360px] lg:h-[62vh] lg:min-h-[440px] overflow-hidden bg-primary" aria-label="Featured products" aria-roledescription="carousel">
+      {heroSlides.length > 0 && <section className="relative h-[34vh] min-h-[240px] sm:h-[46vh] sm:min-h-[320px] lg:h-[56vh] lg:min-h-[400px] overflow-hidden bg-primary" aria-label="Featured products" aria-roledescription="carousel">
         {heroSlides.map((slide, i) => (
           <div
             key={slide.productId}
@@ -93,9 +93,6 @@ export default function HomePage() {
           >
             <img src={slide.bg} alt={slide.title} className="w-full h-full object-cover opacity-60" />
             <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/30 to-transparent" />
-            <div className="absolute inset-x-0 top-8 px-5 sm:px-12 lg:px-20">
-              <h1 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-ivory leading-tight">{slide.title}</h1>
-            </div>
           </div>
         ))}
 
