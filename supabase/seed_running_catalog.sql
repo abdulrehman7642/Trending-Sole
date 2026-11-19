@@ -80,5 +80,14 @@ INSERT INTO public.products (name,slug,category,sub_category,price,sale_price,im
 ('ASICS GT-2000 13 Kids'' Running Shoes','asics-gt-2000-13-kids-running-shoes','kids','sports',282.78,NULL,ARRAY['https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=900&q=85'],ARRAY['28','29','30','31','32','33','34'],'[{"name":"Black","hex":"#111111"},{"name":"White","hex":"#f5f5f5"}]'::jsonb,0,0,25,TRUE,FALSE,'Cushioned kids'' running shoe with a secure fit, flexible ride and durable outsole for active days.','Breathable textile upper with lightweight foam cushioning and rubber outsole.','TS-0073',ARRAY['ASICS','running','kids','source:asics.com']),
 ('New Balance Fresh Foam Arishi v4 Kids'' Running Shoes','new-balance-fresh-foam-arishi-v4-kids-running-shoes','kids','sports',165.26,NULL,ARRAY['https://images.unsplash.com/photo-1495555961986-6d4c1ecb7be3?auto=format&fit=crop&w=900&q=85'],ARRAY['28','29','30','31','32','33','34'],'[{"name":"Black","hex":"#111111"},{"name":"White","hex":"#f5f5f5"}]'::jsonb,0,0,25,TRUE,FALSE,'Cushioned kids'' running shoe with a secure fit, flexible ride and durable outsole for active days.','Breathable textile upper with lightweight foam cushioning and rubber outsole.','TS-0074',ARRAY['New Balance','running','kids','source:newbalance.com']),
 ('PUMA Magnify NITRO 2 Kids'' Running Shoes','puma-magnify-nitro-2-kids-running-shoes','kids','sports',282.78,NULL,ARRAY['https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=900&q=85'],ARRAY['28','29','30','31','32','33','34'],'[{"name":"Black","hex":"#111111"},{"name":"White","hex":"#f5f5f5"}]'::jsonb,0,0,25,TRUE,FALSE,'Cushioned kids'' running shoe with a secure fit, flexible ride and durable outsole for active days.','Breathable textile upper with lightweight foam cushioning and rubber outsole.','TS-0075',ARRAY['PUMA','running','kids','source:us.puma.com']);
+-- Give every product a four-image gallery for carousel/quick-view experiences.
+UPDATE public.products
+SET images = ARRAY[
+  images[1],
+  'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1495555961986-6d4c1ecb7be3?auto=format&fit=crop&w=900&q=85'
+]
+WHERE coalesce(array_length(images, 1), 0) < 4;
 COMMIT;
 
