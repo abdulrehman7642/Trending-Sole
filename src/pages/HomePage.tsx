@@ -82,7 +82,7 @@ export default function HomePage() {
       {catalogError && <p role="alert" className="p-4 text-center text-terracotta">{catalogError}</p>}
       {!catalogLoading && !catalogError && products.length === 0 && <p className="p-4 text-center text-muted">Our product catalog is currently empty.</p>}
       {/* Hero */}
-      {heroSlides.length > 0 && <section className="relative h-[52vh] min-h-[360px] sm:h-[64vh] sm:min-h-[460px] lg:h-[75vh] lg:min-h-[520px] overflow-hidden bg-primary" aria-label="Featured products" aria-roledescription="carousel">
+      {heroSlides.length > 0 && <section className="relative h-[46vh] min-h-[320px] sm:h-[58vh] sm:min-h-[400px] lg:h-[68vh] lg:min-h-[480px] overflow-hidden bg-primary" aria-label="Featured products" aria-roledescription="carousel">
         {heroSlides.map((slide, i) => (
           <div
             key={slide.productId}
@@ -92,28 +92,6 @@ export default function HomePage() {
           >
             <img src={slide.bg} alt={slide.title} className="w-full h-full object-cover opacity-60" />
             <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/30 to-transparent" />
-            <div
-              className={`absolute inset-0 flex flex-col justify-center px-6 sm:px-16 lg:px-24 ${
-                slide.align === 'right' ? 'items-end text-right' : 'items-start text-left'
-              }`}
-            >
-              <div className="max-w-xl">
-                <p className="text-xs tracking-[0.3em] uppercase text-gold font-medium mb-4">Every Step, Refined.</p>
-                <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl text-ivory leading-tight mb-6 whitespace-pre-line">
-                  {slide.title}
-                </h1>
-                <p className="text-sm sm:text-base text-ivory/70 mb-8 leading-relaxed">{slide.subtitle}</p>
-                <button
-                  onClick={() => navigate(slide.ctaPage, { id: slide.productId })}
-                  className="bg-gold text-primary text-xs tracking-widest uppercase px-8 py-4 font-semibold hover:bg-gold-light transition-colors inline-flex items-center gap-3"
-                >
-                  {slide.cta}
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </button>
-              </div>
-            </div>
           </div>
         ))}
 
