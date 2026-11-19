@@ -142,7 +142,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Category tiles */}
+      {/* Category tiles are temporarily hidden. */}
+      {/*
       <section className="max-w-screen-xl mx-auto px-6 lg:px-10 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
@@ -175,6 +176,7 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+      */}
 
       {saleSection}
 
