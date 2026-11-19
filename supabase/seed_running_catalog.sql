@@ -144,5 +144,30 @@ SET images = ARRAY[
 ]
 FROM numbered, pool
 WHERE p.id = numbered.id;
+
+-- Keep each SKU gallery internally consistent: all gallery frames use the
+-- same design source, never a mixture of different shoe models.
+WITH pool AS (
+  SELECT ARRAY[
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=85',
+    'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&w=1200&q=85',
+    'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=1200&q=85',
+    'https://images.unsplash.com/photo-1495555961986-6d4c1ecb7be3?auto=format&fit=crop&w=1200&q=85',
+    'https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=1200&q=85'
+  ] AS imgs
+), numbered AS (
+  SELECT id, row_number() OVER (ORDER BY created_at, id) AS rn
+  FROM public.products
+)
+UPDATE public.products p
+SET images = ARRAY[
+  pool.imgs[((numbered.rn - 1) % 5) + 1] || '&gallery=' || numbered.rn || '-1',
+  pool.imgs[((numbered.rn - 1) % 5) + 1] || '&gallery=' || numbered.rn || '-2',
+  pool.imgs[((numbered.rn - 1) % 5) + 1] || '&gallery=' || numbered.rn || '-3',
+  pool.imgs[((numbered.rn - 1) % 5) + 1] || '&gallery=' || numbered.rn || '-4',
+  pool.imgs[((numbered.rn - 1) % 5) + 1] || '&gallery=' || numbered.rn || '-5'
+]
+FROM numbered, pool
+WHERE p.id = numbered.id;
 COMMIT;
 
