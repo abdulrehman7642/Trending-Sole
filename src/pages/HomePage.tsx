@@ -5,33 +5,6 @@ import { formatPrice } from '../data/products';
 import { useApp } from '../context/AppContext';
 import { Product } from '../types';
 
-const heroSlides = [
-  {
-    title: 'The Autumn\nCollection',
-    subtitle: 'Refined silhouettes for the season ahead',
-    cta: 'Explore Collection',
-    ctaPage: 'plp-new' as const,
-    bg: 'https://images.unsplash.com/photo-1612902377668-68ec50954ad9?w=1600&h=900&fit=crop&auto=format',
-    align: 'left',
-  },
-  {
-    title: 'Women\'s\nEditorial',
-    subtitle: 'Elevated footwear for every occasion',
-    cta: 'Shop Women',
-    ctaPage: 'plp-women' as const,
-    bg: 'https://images.unsplash.com/photo-1675237292372-5068aa262f43?w=1600&h=900&fit=crop&auto=format',
-    align: 'right',
-  },
-  {
-    title: 'Men\'s\nPremium',
-    subtitle: 'From board meetings to weekend escapes',
-    cta: 'Shop Men',
-    ctaPage: 'plp-men' as const,
-    bg: 'https://images.unsplash.com/photo-1603191659812-ee978eeeef76?w=1600&h=900&fit=crop&auto=format',
-    align: 'left',
-  },
-];
-
 function FeaturedImage({ product }: { product: Product }) {
   const images = (Array.isArray(product.images) ? product.images : []).filter((url): url is string => typeof url === 'string' && url.trim().length > 0);
   const [imageIndex, setImageIndex] = useState(0);
@@ -52,11 +25,25 @@ function FeaturedImage({ product }: { product: Product }) {
 
 export default function HomePage() {
   const { navigate, products, catalogLoading, catalogError } = useApp();
+  const heroProducts = products.filter((product) => product.images?.some((image) => image.trim())).slice(0, 3);
+  const heroSlides = heroProducts.map((product, index) => ({
+    title: product.name,
+    subtitle: product.description || 'Designed for every step.',
+    cta: 'Shop product',
+    ctaPage: 'pdp' as const,
+    bg: product.images.find((image) => image.trim()) || '',
+    align: index === 1 ? 'right' : 'left',
+    productId: product.id,
+  }));
   const [heroIdx, setHeroIdx] = useState(0);
   useEffect(() => {
+    if (heroSlides.length < 2) return;
     const timer = window.setTimeout(() => setHeroIdx(index => (index + 1) % heroSlides.length), 3000);
     return () => window.clearTimeout(timer);
-  }, [heroIdx]);
+  }, [heroIdx, heroSlides.length]);
+  useEffect(() => {
+    setHeroIdx(0);
+  }, [heroSlides.length]);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const featured = products.filter((p) => p.isFeatured);
   const editorialProducts = featured.slice(0, 4);
@@ -95,15 +82,15 @@ export default function HomePage() {
       {catalogError && <p role="alert" className="p-4 text-center text-terracotta">{catalogError}</p>}
       {!catalogLoading && !catalogError && products.length === 0 && <p className="p-4 text-center text-muted">Our product catalog is currently empty.</p>}
       {/* Hero */}
-      <section className="relative h-[75vh] min-h-[520px] overflow-hidden bg-primary" aria-label="Featured collections" aria-roledescription="carousel">
+      {heroSlides.length > 0 && <section className="relative h-[52vh] min-h-[360px] sm:h-[64vh] sm:min-h-[460px] lg:h-[75vh] lg:min-h-[520px] overflow-hidden bg-primary" aria-label="Featured products" aria-roledescription="carousel">
         {heroSlides.map((slide, i) => (
           <div
-            key={i}
+            key={slide.productId}
             aria-hidden={i !== heroIdx}
             inert={i !== heroIdx}
             className={`absolute inset-0 transition-opacity duration-700 motion-reduce:transition-none ${i === heroIdx ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
           >
-            <img src={slide.bg} alt="" className="w-full h-full object-cover opacity-60" />
+            <img src={slide.bg} alt={slide.title} className="w-full h-full object-cover opacity-60" />
             <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/30 to-transparent" />
             <div
               className={`absolute inset-0 flex flex-col justify-center px-6 sm:px-16 lg:px-24 ${
@@ -117,7 +104,7 @@ export default function HomePage() {
                 </h1>
                 <p className="text-sm sm:text-base text-ivory/70 mb-8 leading-relaxed">{slide.subtitle}</p>
                 <button
-                  onClick={() => navigate(slide.ctaPage)}
+                  onClick={() => navigate(slide.ctaPage, { id: slide.productId })}
                   className="bg-gold text-primary text-xs tracking-widest uppercase px-8 py-4 font-semibold hover:bg-gold-light transition-colors inline-flex items-center gap-3"
                 >
                   {slide.cta}
@@ -140,7 +127,7 @@ export default function HomePage() {
             </button>
           ))}
         </div>
-      </section>
+      </section>}
 
       {/* Category tiles are temporarily hidden. */}
       {/*
