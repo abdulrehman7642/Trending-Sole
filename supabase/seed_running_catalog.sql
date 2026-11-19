@@ -89,5 +89,36 @@ SET images = ARRAY[
   'https://images.unsplash.com/photo-1495555961986-6d4c1ecb7be3?auto=format&fit=crop&w=900&q=85'
 ]
 WHERE coalesce(array_length(images, 1), 0) < 4;
+
+-- Rotate the official/source image pool per SKU so every product has its own
+-- four-image gallery rather than sharing one identical array.
+WITH pool AS (
+  SELECT ARRAY[
+    'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/f14e8f51-b56a-4e57-8019-95415b627784/AIR+ZOOM+PEGASUS+41.png',
+    'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/26f5adfa-0593-4eee-b7e7-572407a06ff3/AIR+ZOOM+PEGASUS+41.png',
+    'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/17d507fd-7e65-46d0-945f-0ecbf90597d8/AIR+ZOOM+PEGASUS+41.png',
+    'https://cdn.adsport.cz/zbozi/asics/1520x900/asics-gel-nimbus-27_1011B958-400_SB-FR.jpg',
+    'https://media.sportholding.no/5d9bf7a1-246d-4b57-9f90-d53aa84f47e7/a3b446d6-2552-4b04-8224-7d960276baf8/iYgp7o79fAMXFnPZcL4ggtGa2/EMbAZO3SGFiNKGUiiwciY6cRU.png?f=webp&q=60&w=2048',
+    'https://fashionsnap-assets.com/article/images/2025/01/asicsd-gel-nimbus-27-20250124-004-d9957cf1-3f20-498f-8ee8-1bbe0356129e.jpg',
+    'https://cdn.idealo.com/folder/Product/205542/6/205542641/s3_produktbild_max_2/asics-gel-nimbus-27-wave-teal-saxon-green.jpg',
+    'https://assets.footlocker.com/is/image/FLDM/1B958001_01?%24tile500jpg%24=true&bgc=f5f5f5',
+    'https://runner-athletics.gr/sites/default/files/products/1011b958_002_sr_rt_glb_result.jpg',
+    'https://me.asics.com/media/banners/1012B753-001.jpg',
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85',
+    'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&w=900&q=85'
+  ] AS imgs
+), numbered AS (
+  SELECT id, row_number() OVER (ORDER BY created_at, id) AS rn
+  FROM public.products
+)
+UPDATE public.products p
+SET images = ARRAY[
+  pool.imgs[((numbered.rn - 1) % 12) + 1] || '&gallery=' || numbered.rn || '-1',
+  pool.imgs[((numbered.rn + 2) % 12) + 1] || '&gallery=' || numbered.rn || '-2',
+  pool.imgs[((numbered.rn + 5) % 12) + 1] || '&gallery=' || numbered.rn || '-3',
+  pool.imgs[((numbered.rn + 8) % 12) + 1] || '&gallery=' || numbered.rn || '-4'
+]
+FROM numbered, pool
+WHERE p.id = numbered.id;
 COMMIT;
 
